@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@apollo/client": "^3.11.8",
+    "apollo-link-http": "^1.5.17",
+    "cross-fetch": "^4.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}
