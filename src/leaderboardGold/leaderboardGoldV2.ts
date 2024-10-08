@@ -96,7 +96,9 @@ function calculateGold(rank: number, userCount: number, questionCount: number): 
 //   } else 
     if(percentOfUsers < 1) {
     return questionCount * 45
-  } else if (percentOfUsers < 25) {
+  } else if (percentOfUsers < 10) {
+    return questionCount * 15
+  }else if (percentOfUsers < 25) {
     return questionCount * 4
   } else if (percentOfUsers < 50) {
     return questionCount
@@ -118,16 +120,37 @@ const INCREMENT_USER_GOLD = gql`
   }
 `;
 
-// Add this new function to increment user's gold
+// Add this new GraphQL mutation for inserting a notification
+const INSERT_NOTIFICATION = gql`
+  mutation InsertNotification($userId: bigint!, $type: String!, $goldAmount: Int!) {
+    insert_notifications_one(object: {
+      for: $userId,
+      type: $type,
+      gold_amount: $goldAmount
+    }) {
+      id
+    }
+  }
+`;
+
+// Update the incrementUserGold function to also send a notification
 async function incrementUserGold(userId: string, goldIncrement: number) {
   try {
-    const { data } = await client.mutate({
-      mutation: INCREMENT_USER_GOLD,
-      variables: { userId, goldIncrement },
-    });
-    return data.update_users_by_pk.gold_bars;
+    const [goldResult, notificationResult] = await Promise.all([
+      client.mutate({
+        mutation: INCREMENT_USER_GOLD,
+        variables: { userId, goldIncrement },
+      }),
+      client.mutate({
+        mutation: INSERT_NOTIFICATION,
+        variables: { userId, type: "prize", goldAmount: goldIncrement },
+      }),
+    ]);
+
+    console.log(`Notification sent for user ${userId}: ${notificationResult.data.insert_notifications_one.id}`);
+    return goldResult.data.update_users_by_pk.gold_bars;
   } catch (error) {
-    console.error(`Error incrementing gold for user ${userId}:`, error);
+    console.error(`Error incrementing gold and sending notification for user ${userId}:`, error);
     throw error;
   }
 }
@@ -148,7 +171,7 @@ function getUserInput(query: string): Promise<string> {
 // Update the main function
 async function main() {
   try {
-    const date = '2024-10-04'
+    const date = '2024-10-7'
     const [rankings, questionCount] = await Promise.all([
       getUserRankings(date),
       getQuestionCount(date)
@@ -176,14 +199,15 @@ async function main() {
     const confirmation = await getUserInput('Do you want to proceed with updating the gold balances? (yes/no): ');
 
     if (confirmation.toLowerCase() === 'yes') {
-      // Update gold balances in the database
+      // Update gold balances in the database and send notifications
       for (const user of goldDistribution) {
         if (user.gold > 0) {
           const newBalance = await incrementUserGold(user.userId, user.gold);
           console.log(`Updated gold balance for ${user.username} (Rank ${user.rank}): ${newBalance}`);
+          console.log(`Notification sent for ${user.username}`);
         }
       }
-      console.log('Gold balances have been updated.');
+      console.log('Gold balances have been updated and notifications sent.');
     } else {
       console.log('Operation cancelled. No changes were made to the database.');
     }
