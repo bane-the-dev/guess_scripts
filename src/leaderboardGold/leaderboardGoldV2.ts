@@ -122,35 +122,46 @@ const INCREMENT_USER_GOLD = gql`
 
 // Add this new GraphQL mutation for inserting a notification
 const INSERT_NOTIFICATION = gql`
-  mutation InsertNotification($userId: bigint!, $type: String!, $goldAmount: Int!) {
+  mutation InsertNotification($userId: bigint!, $type: String!, $goldAmount: Int, $rank: Int, $competition_name: String) {
     insert_notifications_one(object: {
       for: $userId,
       type: $type,
-      gold_amount: $goldAmount
+      gold_amount: $goldAmount,
+      rank: $rank,
+      competition_name: $competition_name
     }) {
       id
     }
   }
 `;
 
-// Update the incrementUserGold function to also send a notification
-async function incrementUserGold(userId: string, goldIncrement: number) {
+// Update the incrementUserGold function to handle both gold and rank notifications
+async function incrementUserGoldAndNotify(userId: string, goldIncrement: number, rank: number) {
   try {
-    const [goldResult, notificationResult] = await Promise.all([
-      client.mutate({
-        mutation: INCREMENT_USER_GOLD,
-        variables: { userId, goldIncrement },
-      }),
+    const promises = [
       client.mutate({
         mutation: INSERT_NOTIFICATION,
-        variables: { userId, type: "prize", goldAmount: goldIncrement },
-      }),
-    ]);
+        variables: { userId, type: "rank", rank: rank, competition_name: "points" },
+      })
+    ];
 
-    console.log(`Notification sent for user ${userId}: ${notificationResult.data.insert_notifications_one.id}`);
-    return goldResult.data.update_users_by_pk.gold_bars;
+    if (goldIncrement > 0) {
+      promises.push(
+        client.mutate({
+          mutation: INCREMENT_USER_GOLD,
+          variables: { userId, goldIncrement },
+        }),
+        client.mutate({
+          mutation: INSERT_NOTIFICATION,
+          variables: { userId, type: "prize", goldAmount: goldIncrement },
+        })
+      );
+    }
+
+    const results = await Promise.all(promises);
+    return goldIncrement > 0 ? results[1].data.update_users_by_pk.gold_bars : null;
   } catch (error) {
-    console.error(`Error incrementing gold and sending notification for user ${userId}:`, error);
+    console.error(`Error incrementing gold and sending notifications for user ${userId}:`, error);
     throw error;
   }
 }
@@ -171,7 +182,7 @@ function getUserInput(query: string): Promise<string> {
 // Update the main function
 async function main() {
   try {
-    const date = '2024-10-9'
+    const date = '2024-10-11'
     const [rankings, questionCount] = await Promise.all([
       getUserRankings(date),
       getQuestionCount(date)
@@ -201,11 +212,9 @@ async function main() {
     if (confirmation.toLowerCase() === 'yes') {
       // Update gold balances in the database and send notifications
       for (const user of goldDistribution) {
-        if (user.gold > 0) {
-          const newBalance = await incrementUserGold(user.userId, user.gold);
-          console.log(`Updated gold balance for ${user.username} (Rank ${user.rank}): ${newBalance}`);
-          console.log(`Notification sent for ${user.username}`);
-        }
+        const newBalance = await incrementUserGoldAndNotify(user.userId, user.gold, user.rank);
+        console.log(`Updated gold balance for ${user.username} (Rank ${user.rank}): ${newBalance}`);
+        console.log(`Notifications sent for ${user.username}`);
       }
       console.log('Gold balances have been updated and notifications sent.');
     } else {
