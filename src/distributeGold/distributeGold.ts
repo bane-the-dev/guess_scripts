@@ -91,11 +91,11 @@ async function getUserByUsername(username: string) {
 // Function to give gold bars to a user and send a notification
 async function giveGoldBarsToUser(userId: string, goldAmount: number) {
   try {
-    // const [goldResult, notificationResult] = await Promise.all([
-    //   client.mutate({
-    //     mutation: INCREMENT_USER_GOLD,
-    //     variables: { userId: userId, goldIncrement: goldAmount },
-    //   }),
+    const [goldResult, notificationResult] = await Promise.all([
+      client.mutate({
+        mutation: INCREMENT_USER_GOLD,
+        variables: { userId: userId, goldIncrement: goldAmount },
+      }),
       client.mutate({
         mutation: INSERT_NOTIFICATION,
         variables: { userId: userId, type: 'prize', goldAmount },
