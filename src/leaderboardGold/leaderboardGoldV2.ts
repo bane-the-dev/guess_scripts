@@ -182,11 +182,12 @@ function getUserInput(query: string): Promise<string> {
 // Update the main function
 async function main() {
   try {
-    const date = '2024-10-11'
-    const [rankings, questionCount] = await Promise.all([
+    const date = '2024-10-26'
+    const [rankings] = await Promise.all([
       getUserRankings(date),
-      getQuestionCount(date)
+      // getQuestionCount(date)
     ]);
+    const questionCount = 15
     
     // Remove users with the lowest rank
     const lowestRank = Math.max(...rankings.map(r => r.rank));
@@ -194,11 +195,9 @@ async function main() {
     
     const userCount = filteredRankings.length;
 
-    // Calculate gold for each user and print the proposed distribution
     console.log("DATE: ", date)
     console.log("userCount", userCount)
     console.log("questionCount", questionCount)
-    console.log('Proposed gold distribution:');
     
     const goldDistribution = filteredRankings.map(ranking => {
       const gold = calculateGold(ranking.rank, userCount, questionCount);
@@ -225,5 +224,5 @@ async function main() {
   }
 }
 
-// Run the script
+
 main();
