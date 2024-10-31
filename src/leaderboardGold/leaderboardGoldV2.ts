@@ -182,7 +182,7 @@ function getUserInput(query: string): Promise<string> {
 // Update the main function
 async function main() {
   try {
-    const date = '2024-10-26'
+    const date = '2024-10-30'
     const [rankings] = await Promise.all([
       getUserRankings(date),
       // getQuestionCount(date)
