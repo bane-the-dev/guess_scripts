@@ -20,7 +20,7 @@ const client = new ApolloClient({
 // GraphQL query to get all pictures
 const GET_ALL_PICTURES = gql`
   query GetAllPictures {
-    pictures(where: { category: { _eq: "s_crashcar" } }) {
+    pictures(where: { category: { _eq: "videogames" } }) {
       id
       category
     }
@@ -29,8 +29,8 @@ const GET_ALL_PICTURES = gql`
 
 // GraphQL mutation to insert multiple questions
 const INSERT_QUESTIONS = gql`
-  mutation InsertQuestions($objects: [streak_questions_insert_input!]!) {
-    insert_streak_questions(objects: $objects) {
+  mutation InsertSimpleQuestions($objects: [simple_questions_insert_input!]!) {
+    insert_simple_questions(objects: $objects) {
       returning {
         id
       }
@@ -57,18 +57,20 @@ async function createQuestions() {
     const pictures = await getAllPictures();
     const questions = [];
 
-    // Generate unique combinations of pictures
+    // Generate questions for each picture
     for (let i = 0; i < pictures.length; i++) {
       for (let j = i + 1; j < pictures.length; j++) {
         questions.push({
           picture_1: pictures[i].id,
           picture_2: pictures[j].id,
           category: pictures[i].category || 'Uncategorized', // Use a default category if none exists
+          is_active: false,
+          question_state: "inactive"
         });
       }
     }
 
-    // Insert questions into the database in a single batch
+    // Insert questions into the simple_questions table
     await client.mutate({
       mutation: INSERT_QUESTIONS,
       variables: {
@@ -76,9 +78,9 @@ async function createQuestions() {
       },
     });
 
-    console.log('All questions have been created successfully.');
+    console.log('All simple questions have been created successfully.');
   } catch (error) {
-    console.error('Error creating questions:', error);
+    console.error('Error creating simple questions:', error);
   }
 }
 

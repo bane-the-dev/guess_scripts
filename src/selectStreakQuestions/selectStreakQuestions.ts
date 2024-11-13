@@ -28,20 +28,17 @@ export interface StreakQuestion {
 
 export const GET_STREAK_QUESTIONS = gql`
   query GetStreakQuestions {
-    streak_questions(
+    simple_questions(
       where: {is_active: {_eq: false}}
     ) {
       id
       picture_1
       picture_2
       category
-      streak_user_answers_aggregate {
+      simple_user_answers_aggregate {
         aggregate {
           count
         }
-      }
-      streak_questions_odds {
-        odds
       }
     }
   }
@@ -49,7 +46,7 @@ export const GET_STREAK_QUESTIONS = gql`
 
 export const UPDATE_QUESTIONS_ACTIVE_STATUS = gql`
   mutation UpdateQuestionsActiveStatus($questionIds: [bigint!]!) {
-    update_streak_questions(
+    update_simple_questions(
       where: {id: {_in: $questionIds}}, 
       _set: {is_active: true}
     ) {
@@ -60,23 +57,23 @@ export const UPDATE_QUESTIONS_ACTIVE_STATUS = gql`
 
 export const GET_QUESTIONS_COUNT = gql`
   query GetQuestionsCount {
-    active: streak_questions_aggregate(where: {is_active: {_eq: true}}) {
+    active: simple_questions_aggregate(where: {is_active: {_eq: true}}) {
       aggregate {
         count
       }
     }
-    inactive: streak_questions_aggregate(where: {is_active: {_eq: false}}) {
+    inactive: simple_questions_aggregate(where: {is_active: {_eq: false}}) {
       aggregate {
         count
       }
     }
-    categories: streak_questions(distinct_on: category) {
+    categories: simple_questions(distinct_on: category) {
       category
     }
-    active_by_category: streak_questions(where: {is_active: {_eq: true}}) {
+    active_by_category: simple_questions(where: {is_active: {_eq: true}}) {
       category
     }
-    inactive_by_category: streak_questions(where: {is_active: {_eq: false}}) {
+    inactive_by_category: simple_questions(where: {is_active: {_eq: false}}) {
       category
     }
   }
@@ -101,7 +98,7 @@ export const selectStreakQuestions = async () => {
   });
 
   // Group questions by category
-  const questionsByCategory = data.streak_questions.reduce((acc: { [key: string]: any[] }, question: any) => {
+  const questionsByCategory = data.simple_questions.reduce((acc: { [key: string]: any[] }, question: any) => {
     const category = question.category || 'uncategorized';
     if (!acc[category]) {
       acc[category] = [];
@@ -111,8 +108,7 @@ export const selectStreakQuestions = async () => {
       picture1: question.picture_1,
       picture2: question.picture_2,
       category: question.category,
-      answerCount: question?.streak_user_answers_aggregate?.aggregate?.count || 0,
-      odds: question.streak_questions_odds?.odds || 0,
+      answerCount: question?.simple_user_answers_aggregate?.aggregate?.count || 0,
     });
     return acc;
   }, {});

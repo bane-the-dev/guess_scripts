@@ -1,11 +1,14 @@
 {
   "dependencies": {
     "@apollo/client": "^3.11.8",
+    "@aws-sdk/client-s3": "^3.689.0",
     "apollo-link-error": "^1.1.13",
     "apollo-link-http": "^1.5.17",
     "cross-fetch": "^4.0.0",
     "csv-parser": "^3.0.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "install": "^0.13.0",
+    "npm": "^10.9.0"
   },
   "devDependencies": {
     "@types/node": "^22.7.4"
