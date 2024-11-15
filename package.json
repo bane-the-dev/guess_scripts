@@ -7,12 +7,9 @@
     "cross-fetch": "^4.0.0",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
-<<<<<<< HEAD
     "install": "^0.13.0",
-    "npm": "^10.9.0"
-=======
+    "npm": "^10.9.0",
     "typescript": "^5.6.3"
->>>>>>> e2deb11174718a592cb1fc2a30734cbfb04d191f
   },
   "devDependencies": {
     "@types/node": "^22.7.4"
