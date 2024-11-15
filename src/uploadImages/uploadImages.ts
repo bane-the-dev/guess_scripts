@@ -106,4 +106,4 @@ async function uploadImagesToS3AndDatabase(folderPath: string) {
 }
 
 // Usage
-uploadImagesToS3AndDatabase('./images/videogames'); 
+uploadImagesToS3AndDatabase('./images/jobs'); 

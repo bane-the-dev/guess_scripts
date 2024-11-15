@@ -65,7 +65,7 @@ async function getQuestionsWithAnswerCounts(currentState: string) {
   }
 }
 
-async function graduateQuestionsAboveThreshold(answerThreshold: number, currentState: string, newState: string) {
+async function graduateQuestionsAboveThreshold(answerThreshold: number, currentState: string, newState: string, existingRl?: readline.Interface) {
   try {
     // First get all questions with their counts
     const questionsWithCounts = await getQuestionsWithAnswerCounts(currentState);
@@ -92,7 +92,8 @@ async function graduateQuestionsAboveThreshold(answerThreshold: number, currentS
       console.log(`${category}: ${questions.length} questions available`);
     });
 
-    const rl = readline.createInterface({
+    // Use the existing readline interface if provided, otherwise create a new one
+    const rl = existingRl || readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });
@@ -151,6 +152,11 @@ async function graduateQuestionsAboveThreshold(answerThreshold: number, currentS
       rl.close();
       throw error;
     }
+
+    // Only close the readline interface if we created it
+    if (!existingRl) {
+      rl.close();
+    }
   } catch (error) {
     console.error('Error graduating questions:', error);
     throw error;
@@ -185,12 +191,14 @@ if (require.main === module) {
 
       console.log(`\nFinding questions in state "${currentState}" with ${threshold} or more answers...`);
       
-      graduateQuestionsAboveThreshold(threshold, currentState, newState)
+      graduateQuestionsAboveThreshold(threshold, currentState, newState, rl)
         .then(() => {
           console.log('Graduation process completed');
+          rl.close();
         })
         .catch((error) => {
           console.error(error);
+          rl.close();
         });
     });
   });
