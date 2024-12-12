@@ -20,7 +20,7 @@ const client = new ApolloClient({
 // GraphQL query to get all pictures
 const GET_ALL_PICTURES = gql`
   query GetAllPictures {
-    pictures(where: { category: { _eq: "jobs" } }) {
+    pictures(where: { category: { _eq: "altcoins" } }) {
       id
       category
     }
