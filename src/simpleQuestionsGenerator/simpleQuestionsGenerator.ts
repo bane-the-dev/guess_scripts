@@ -20,7 +20,7 @@ const client = new ApolloClient({
 // GraphQL query to get all pictures
 const GET_ALL_PICTURES = gql`
   query GetAllPictures {
-    pictures(where: { category: { _eq: "altcoins" } }) {
+    pictures(where: { category: { _eq: "videogames" } }) {
       id
       category
     }
@@ -65,7 +65,8 @@ async function createQuestions() {
           picture_2: pictures[j].id,
           category: pictures[i].category || 'Uncategorized', // Use a default category if none exists
           is_active: false,
-          question_state: "inactive"
+          question_state: "inactive",
+          created_by_user_id: "the_intern"
         });
       }
     }

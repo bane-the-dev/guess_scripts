@@ -18,7 +18,7 @@ const client = new ApolloClient({
 
 const GET_ALL_PICTURES = gql`
   query GetAllPictures {
-    pictures(where: { category: { _eq: "landmarks" } }) {
+    pictures(where: { category: { _eq: "videogames" } }) {
       id
       category
     }
@@ -76,7 +76,8 @@ async function createQuestionsOneByOne() {
           picture_2: pictures[j].id,
           category: pictures[i].category || 'Uncategorized',
           is_active: false,
-          question_state: "inactive"
+          question_state: "inactive",
+          created_by_user_id: "the_intern"
         };
 
         const success = await insertSingleQuestion(question);

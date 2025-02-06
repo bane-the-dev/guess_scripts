@@ -22,11 +22,8 @@ const GET_QUESTIONS_WITH_COUNTS = gql`
     simple_questions(where: {question_state: {_eq: $state}}) {
       id
       category
-      simple_user_answers_aggregate {
-        aggregate {
-          count
-        }
-      }
+      true_answer_count
+      false_answer_count
     }
   }
 `;
@@ -52,7 +49,7 @@ async function getQuestionsWithAnswerCounts(currentState: string) {
     const questionsWithCounts = data.simple_questions.map((question: any) => ({
       questionId: question.id,
       category: question.category,
-      answerCount: question.simple_user_answers_aggregate.aggregate.count
+      answerCount: question.true_answer_count + question.false_answer_count
     }));
 
     // Sort by answer count for better visibility
