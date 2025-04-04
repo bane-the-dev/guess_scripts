@@ -20,7 +20,7 @@ const client = new ApolloClient({
 // GraphQL query to get all pictures
 const GET_ALL_PICTURES = gql`
   query GetAllPictures {
-    pictures(where: { category: { _eq: "videogames" } }) {
+    pictures(where: { category: { _eq: "astrologicalsigns" } }) {
       id
       category
     }
@@ -63,23 +63,26 @@ async function createQuestions() {
         questions.push({
           picture_1: pictures[i].id,
           picture_2: pictures[j].id,
-          category: pictures[i].category || 'Uncategorized', // Use a default category if none exists
+          category: pictures[i].category || 'Uncategorized',
           is_active: false,
           question_state: "inactive",
-          created_by_user_id: "the_intern"
+          created_by_user_id: "cm6l2mpqv00ushje9ig6rzmns",
+          is_explicit_content: true
         });
       }
     }
 
+    console.log(`Generated ${questions.length} questions to be inserted for category: ${pictures[0].category}`);
+
     // Insert questions into the simple_questions table
-    await client.mutate({
+    const result = await client.mutate({
       mutation: INSERT_QUESTIONS,
       variables: {
         objects: questions,
       },
     });
 
-    console.log('All simple questions have been created successfully.');
+    console.log(`Successfully inserted ${result.data.insert_simple_questions.returning.length} questions into the database for category: ${pictures[0].category}`);
   } catch (error) {
     console.error('Error creating simple questions:', error);
   }

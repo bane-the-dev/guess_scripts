@@ -77,7 +77,8 @@ async function createQuestionsOneByOne() {
           category: pictures[i].category || 'Uncategorized',
           is_active: false,
           question_state: "inactive",
-          created_by_user_id: "the_intern"
+          created_by_user_id: "the_intern",
+          is_explicit_content: false
         };
 
         const success = await insertSingleQuestion(question);
